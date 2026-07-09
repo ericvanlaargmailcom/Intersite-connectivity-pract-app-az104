@@ -11,6 +11,9 @@ param cosmosLocation string = location
 @secure()
 param trainerKey string
 
+@description('Deploy Cosmos DB. Set to false to publish the web app with local JSON fallback storage.')
+param deployCosmos bool = true
+
 @description('App Service plan SKU. B1 is usually enough for classroom use.')
 param appServiceSku string = 'B1'
 
@@ -23,6 +26,38 @@ param cosmosContainerName string = 'sessions'
 var normalizedAppName = toLower(replace(appName, '_', '-'))
 var planName = '${normalizedAppName}-plan'
 var cosmosAccountName = take('${normalizedAppName}-cosmos', 44)
+var baseAppSettings = [
+  {
+    name: 'NODE_ENV'
+    value: 'production'
+  }
+  {
+    name: 'TRAINER_KEY'
+    value: trainerKey
+  }
+  {
+    name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+    value: 'true'
+  }
+]
+var cosmosAppSettings = deployCosmos ? [
+  {
+    name: 'COSMOS_ENDPOINT'
+    value: cosmos!.properties.documentEndpoint
+  }
+  {
+    name: 'COSMOS_KEY'
+    value: cosmos!.listKeys().primaryMasterKey
+  }
+  {
+    name: 'COSMOS_DATABASE_ID'
+    value: cosmosDatabaseName
+  }
+  {
+    name: 'COSMOS_CONTAINER_ID'
+    value: cosmosContainerName
+  }
+] : []
 
 resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: planName
@@ -49,41 +84,12 @@ resource site 'Microsoft.Web/sites@2023-12-01' = {
       alwaysOn: true
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
-      appSettings: [
-        {
-          name: 'NODE_ENV'
-          value: 'production'
-        }
-        {
-          name: 'TRAINER_KEY'
-          value: trainerKey
-        }
-        {
-          name: 'COSMOS_ENDPOINT'
-          value: cosmos.properties.documentEndpoint
-        }
-        {
-          name: 'COSMOS_KEY'
-          value: cosmos.listKeys().primaryMasterKey
-        }
-        {
-          name: 'COSMOS_DATABASE_ID'
-          value: cosmosDatabaseName
-        }
-        {
-          name: 'COSMOS_CONTAINER_ID'
-          value: cosmosContainerName
-        }
-        {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
-        }
-      ]
+      appSettings: concat(baseAppSettings, cosmosAppSettings)
     }
   }
 }
 
-resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
+resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = if (deployCosmos) {
   name: cosmosAccountName
   location: cosmosLocation
   kind: 'GlobalDocumentDB'
@@ -105,7 +111,7 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
   }
 }
 
-resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024-05-15' = {
+resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024-05-15' = if (deployCosmos) {
   parent: cosmos
   name: cosmosDatabaseName
   properties: {
@@ -115,7 +121,7 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024-05-15
   }
 }
 
-resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = {
+resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = if (deployCosmos) {
   parent: database
   name: cosmosContainerName
   properties: {
@@ -149,4 +155,4 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
 }
 
 output appUrl string = 'https://${site.properties.defaultHostName}'
-output cosmosAccount string = cosmos.name
+output cosmosAccount string = deployCosmos ? cosmos!.name : ''

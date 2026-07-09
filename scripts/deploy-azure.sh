@@ -4,6 +4,7 @@ set -euo pipefail
 RESOURCE_GROUP="${RESOURCE_GROUP:-az104-connectivity-game-rg}"
 LOCATION="${LOCATION:-westeurope}"
 COSMOS_LOCATION="${COSMOS_LOCATION:-$LOCATION}"
+DEPLOY_COSMOS="${DEPLOY_COSMOS:-true}"
 APP_NAME="${APP_NAME:-}"
 TRAINER_KEY="${TRAINER_KEY:-}"
 
@@ -21,6 +22,7 @@ DEPLOY_ARGS=(
   --template-file infra/main.bicep
   --parameters trainerKey="$TRAINER_KEY"
   --parameters cosmosLocation="$COSMOS_LOCATION"
+  --parameters deployCosmos="$DEPLOY_COSMOS"
 )
 
 if [[ -n "$APP_NAME" ]]; then
