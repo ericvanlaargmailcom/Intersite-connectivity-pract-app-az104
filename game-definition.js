@@ -7,6 +7,7 @@ export const gameDefinition = {
       name: "Site-to-site VPN",
       shortName: "S2S VPN",
       icon: "S2S",
+      iconPath: "/assets/icons/s2s-vpn.svg",
       description: "Encrypted IPsec tunnel between on-premises and Azure."
     },
     {
@@ -14,6 +15,7 @@ export const gameDefinition = {
       name: "ExpressRoute",
       shortName: "ExpressRoute",
       icon: "ER",
+      iconPath: "/assets/icons/expressroute.svg",
       description: "Private connectivity from on-premises to Microsoft cloud."
     },
     {
@@ -21,6 +23,7 @@ export const gameDefinition = {
       name: "Point-to-site VPN",
       shortName: "P2S VPN",
       icon: "P2S",
+      iconPath: "/assets/icons/p2s-vpn.svg",
       description: "User device VPN connection into Azure."
     },
     {
@@ -28,6 +31,7 @@ export const gameDefinition = {
       name: "Azure Firewall",
       shortName: "Firewall",
       icon: "FW",
+      iconPath: "/assets/icons/azure-firewall.svg",
       description: "Central network security and filtering in the hub."
     },
     {
@@ -35,6 +39,7 @@ export const gameDefinition = {
       name: "VPN Gateway",
       shortName: "VPN Gateway",
       icon: "GW",
+      iconPath: "/assets/icons/vpn-gateway.svg",
       description: "Azure gateway resource that terminates VPN connections."
     },
     {
@@ -42,6 +47,7 @@ export const gameDefinition = {
       name: "Service Endpoint",
       shortName: "Service Endpoint",
       icon: "SE",
+      iconPath: "/assets/icons/service-endpoint.svg",
       description: "Extends VNet identity to supported Azure platform services."
     },
     {
@@ -49,6 +55,7 @@ export const gameDefinition = {
       name: "Private Endpoint",
       shortName: "Private Endpoint",
       icon: "PE",
+      iconPath: "/assets/icons/private-endpoint.svg",
       description: "Private IP in your VNet for a specific Azure PaaS resource."
     },
     {
@@ -56,6 +63,7 @@ export const gameDefinition = {
       name: "VNet Peering",
       shortName: "Peering",
       icon: "VP",
+      iconPath: "/assets/icons/vnet-peering.svg",
       description: "Connects virtual networks over the Azure backbone."
     },
     {
@@ -63,6 +71,7 @@ export const gameDefinition = {
       name: "Azure Load Balancer",
       shortName: "Load Balancer",
       icon: "LB",
+      iconPath: "/assets/icons/azure-load-balancer.svg",
       description: "Layer 4 load distribution for VMs or internal services."
     },
     {
@@ -70,6 +79,7 @@ export const gameDefinition = {
       name: "Azure Application Gateway",
       shortName: "App Gateway",
       icon: "AG",
+      iconPath: "/assets/icons/application-gateway.svg",
       description: "Layer 7 HTTP(S) load balancing and routing."
     },
     {
@@ -77,6 +87,7 @@ export const gameDefinition = {
       name: "NAT",
       shortName: "NAT",
       icon: "NAT",
+      iconPath: "/assets/icons/nat.svg",
       description: "Distractor: not used in this target design.",
       distractor: true
     }
@@ -87,24 +98,24 @@ export const gameDefinition = {
       label: "Remote user access",
       hint: "Individual admin laptop into Azure",
       correctServiceId: "p2s-vpn",
-      x: 13,
-      y: 17
+      x: 10,
+      y: 14
     },
     {
       id: "s2s-link",
       label: "On-premises encrypted tunnel",
       hint: "Branch/datacenter to Azure over public internet",
       correctServiceId: "s2s-vpn",
-      x: 22,
-      y: 45
+      x: 24,
+      y: 41
     },
     {
       id: "private-circuit",
       label: "Private WAN circuit",
       hint: "Dedicated carrier/private connectivity",
       correctServiceId: "expressroute",
-      x: 21,
-      y: 70
+      x: 24,
+      y: 76
     },
     {
       id: "hub-gateway",
@@ -112,55 +123,55 @@ export const gameDefinition = {
       hint: "Terminates VPN connectivity in Azure",
       correctServiceId: "vpn-gateway",
       x: 43,
-      y: 49
+      y: 53
     },
     {
       id: "hub-security",
       label: "Central hub inspection",
       hint: "North-south and east-west traffic filtering",
       correctServiceId: "azure-firewall",
-      x: 55,
-      y: 46
+      x: 56,
+      y: 38
     },
     {
       id: "hub-spoke-connection",
       label: "Hub to spoke connection",
       hint: "Azure backbone VNet-to-VNet connectivity",
       correctServiceId: "vnet-peering",
-      x: 67,
-      y: 46
+      x: 69,
+      y: 50
     },
     {
       id: "public-web-entry",
       label: "Public web entry",
       hint: "HTTP(S), WAF-ready, path-based routing",
       correctServiceId: "application-gateway",
-      x: 82,
-      y: 18
+      x: 86,
+      y: 17
     },
     {
       id: "vm-distribution",
       label: "VM traffic distribution",
       hint: "Layer 4 balancing to compute instances",
       correctServiceId: "azure-load-balancer",
-      x: 82,
-      y: 47
+      x: 86,
+      y: 43
     },
     {
       id: "paas-public-path",
       label: "PaaS via Azure backbone",
       hint: "Subnet reaches supported service using service endpoint",
       correctServiceId: "service-endpoint",
-      x: 70,
-      y: 76
+      x: 72,
+      y: 79
     },
     {
       id: "paas-private-ip",
       label: "PaaS private IP",
       hint: "Private endpoint NIC inside the VNet",
       correctServiceId: "private-endpoint",
-      x: 88,
-      y: 76
+      x: 91,
+      y: 79
     }
   ]
 };

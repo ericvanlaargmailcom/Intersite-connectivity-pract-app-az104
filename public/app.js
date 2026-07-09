@@ -147,15 +147,17 @@ async function renderPlay(sessionId) {
           <button class="button primary" type="submit">Submit</button>
         </form>
       </header>
-      <div class="game-grid">
+      <div class="game-board">
         <section class="diagram-panel">
           ${renderInteractiveDiagram()}
         </section>
-        <aside class="service-bank-panel">
-          <h2>Services</h2>
+        <section class="service-bank-panel">
+          <div class="tray-heading">
+            <h2>Drag a service to the right place</h2>
+            <p>One service is intentionally left unused.</p>
+          </div>
           <div id="serviceBank" class="service-bank"></div>
-          <p class="bank-note">One service is intentionally left unused.</p>
-        </aside>
+        </section>
       </div>
     </section>
   `;
@@ -279,14 +281,14 @@ function renderDiagramBackdrop() {
     <div class="zone zone-spoke">Spoke VNet</div>
     <div class="zone zone-paas">Azure PaaS</div>
     <svg class="network-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M14 22 C28 24, 32 42, 43 52" />
-      <path d="M17 53 C28 54, 33 52, 43 52" />
-      <path d="M17 76 C30 74, 34 62, 43 52" />
-      <path d="M48 52 C54 49, 57 49, 61 52" />
-      <path d="M61 52 C67 49, 72 49, 77 52" />
-      <path d="M82 25 C82 32, 82 39, 82 48" />
-      <path d="M78 58 C75 65, 73 70, 71 78" />
-      <path d="M84 58 C87 65, 88 70, 88 78" />
+      <path d="M10 20 C25 21, 31 41, 42 53" />
+      <path d="M18 45 C28 45, 34 49, 42 53" />
+      <path d="M18 80 C30 79, 34 66, 42 53" />
+      <path d="M47 53 C53 44, 56 42, 60 44" />
+      <path d="M60 44 C66 46, 70 49, 75 52" />
+      <path d="M86 24 C86 30, 86 36, 86 43" />
+      <path d="M79 56 C76 64, 74 71, 72 79" />
+      <path d="M88 56 C90 65, 91 72, 91 79" />
     </svg>
   `;
 }
@@ -305,8 +307,8 @@ function renderServiceBank() {
 function renderServiceCard(service) {
   return `
     <button class="service-card ${service.distractor ? "distractor" : ""}" data-service-id="${service.id}" type="button">
-      <strong>${escapeHtml(service.icon)}</strong>
-      <span>${escapeHtml(service.shortName)}</span>
+      ${renderServiceIcon(service)}
+      <span>${escapeHtml(service.name)}</span>
     </button>
   `;
 }
@@ -314,11 +316,19 @@ function renderServiceCard(service) {
 function renderPlacedService(service, meta = "") {
   return `
     <div class="placed-service">
-      <strong>${escapeHtml(service.icon)}</strong>
+      ${renderServiceIcon(service)}
       <span>${escapeHtml(service.shortName)}</span>
       ${meta ? `<small>${escapeHtml(meta)}</small>` : ""}
     </div>
   `;
+}
+
+function renderServiceIcon(service) {
+  if (service.iconPath) {
+    return `<span class="azure-icon"><img src="${escapeHtml(service.iconPath)}" alt="" loading="lazy" /></span>`;
+  }
+
+  return `<strong>${escapeHtml(service.icon)}</strong>`;
 }
 
 function wirePlacementInteractions() {

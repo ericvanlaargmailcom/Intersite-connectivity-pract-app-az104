@@ -9,6 +9,7 @@ Interactive classroom web app for AZ-104 networking practice. Learners open a se
 - Cosmos DB storage in Azure, with local JSON fallback for development.
 - Bicep template for Azure App Service + Cosmos DB.
 - Azure deployment script.
+- Local SVG assets sourced from AZ-Icons / Microsoft Azure Architecture Icons.
 
 ## Game design
 
@@ -26,6 +27,10 @@ Learners place 10 services onto 10 fixed locations:
 - Azure Application Gateway
 
 NAT is included as an unused distractor.
+
+## Icon attribution
+
+The Azure icon assets in `public/assets/icons` are sourced from [AZ-Icons](https://az-icons.com/), which republishes the official Microsoft Azure Architecture Icons. Review Microsoft's [icon terms](https://learn.microsoft.com/en-us/azure/architecture/icons/#icon-terms) before using them outside training/demo material.
 
 ## Local development
 
