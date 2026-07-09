@@ -1,0 +1,21 @@
+{
+  "name": "intersite-connectivity-pract-app-az104",
+  "version": "1.0.0",
+  "description": "Interactive AZ-104 intersite connectivity placement game for classroom training.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js",
+    "check": "node --check server.js && node --check public/app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.3.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4"
+  }
+}
