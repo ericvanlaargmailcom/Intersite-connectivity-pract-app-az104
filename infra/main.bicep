@@ -4,6 +4,9 @@ param appName string = 'az104-connectivity-${uniqueString(resourceGroup().id)}'
 @description('Azure region for all resources.')
 param location string = resourceGroup().location
 
+@description('Azure region for Cosmos DB. Use this when the app region has temporary Cosmos DB capacity limits.')
+param cosmosLocation string = location
+
 @description('Trainer key required by trainer-only API calls. Use a strong value in real deployments.')
 @secure()
 param trainerKey string
@@ -82,13 +85,13 @@ resource site 'Microsoft.Web/sites@2023-12-01' = {
 
 resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
   name: cosmosAccountName
-  location: location
+  location: cosmosLocation
   kind: 'GlobalDocumentDB'
   properties: {
     databaseAccountOfferType: 'Standard'
     locations: [
       {
-        locationName: location
+        locationName: cosmosLocation
         failoverPriority: 0
         isZoneRedundant: false
       }
