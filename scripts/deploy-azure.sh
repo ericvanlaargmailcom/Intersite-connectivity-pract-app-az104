@@ -5,6 +5,7 @@ RESOURCE_GROUP="${RESOURCE_GROUP:-az104-connectivity-game-rg}"
 LOCATION="${LOCATION:-westeurope}"
 COSMOS_LOCATION="${COSMOS_LOCATION:-$LOCATION}"
 DEPLOY_COSMOS="${DEPLOY_COSMOS:-true}"
+DEPLOY_REMOTE_BUILD="${DEPLOY_REMOTE_BUILD:-true}"
 APP_NAME="${APP_NAME:-}"
 TRAINER_KEY="${TRAINER_KEY:-}"
 
@@ -42,11 +43,20 @@ if [[ -z "$WEBAPP_NAME" ]]; then
     --resource-group "$RESOURCE_GROUP" \
     --name main \
     --query properties.outputs.appUrl.value \
-    --output tsv | sed -E 's#https://([^.]*)\..*#\1#')"
+      --output tsv | sed -E 's#https://([^.]*)\..*#\1#')"
 fi
 
-zip -r app.zip . \
-  -x "node_modules/*" ".git/*" ".data/*" "app.zip" "infra/main.json" "work/*" "outputs/*"
+az webapp config appsettings set \
+  --resource-group "$RESOURCE_GROUP" \
+  --name "$WEBAPP_NAME" \
+  --settings SCM_DO_BUILD_DURING_DEPLOYMENT="$DEPLOY_REMOTE_BUILD"
+
+ZIP_EXCLUDES=(".git/*" ".data/*" "app.zip" "infra/main.json" "work/*" "outputs/*")
+if [[ "$DEPLOY_REMOTE_BUILD" == "true" ]]; then
+  ZIP_EXCLUDES+=("node_modules/*")
+fi
+
+zip -r app.zip . -x "${ZIP_EXCLUDES[@]}"
 
 az webapp deploy \
   --resource-group "$RESOURCE_GROUP" \
