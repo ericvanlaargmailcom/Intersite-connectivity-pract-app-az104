@@ -21,6 +21,11 @@ async function init() {
 async function renderRoute() {
   const path = window.location.pathname;
 
+  if (path === "/" || path === "/join" || path === "/j") {
+    renderJoin();
+    return;
+  }
+
   if (path.startsWith("/play/")) {
     await renderPlay(path.split("/").pop());
     return;
@@ -36,25 +41,41 @@ async function renderRoute() {
     return;
   }
 
-  renderHome();
+  renderJoin();
 }
 
-function renderHome() {
+function renderJoin() {
   app.innerHTML = `
-    <section class="home-layout">
-      <div class="home-copy">
+    <section class="join-layout">
+      <div class="join-copy">
         <p class="eyebrow">AZ-104 classroom practice</p>
-        <h1>Intersite connectivity placement game</h1>
-        <p class="lead">Open the trainer page, start a session, and let learners place Azure networking services on a shared architecture diagram.</p>
-        <div class="home-actions">
-          <a class="button primary" href="/trainer">Open trainer page</a>
-        </div>
+        <h1>Join the connectivity challenge</h1>
+        <p class="lead">Enter the session code from the trainer screen, then place the Azure networking services on the architecture diagram.</p>
       </div>
-      <div class="mini-board" aria-hidden="true">
-        ${renderStaticDiagram({}, { compact: true })}
-      </div>
+      <form id="joinForm" class="join-panel">
+        <label>
+          <span>Your name</span>
+          <input id="joinName" autocomplete="name" placeholder="e.g. Eric" required />
+        </label>
+        <label>
+          <span>Session code</span>
+          <input id="joinCode" autocomplete="off" inputmode="text" placeholder="e.g. A1B2C3" required />
+        </label>
+        <button class="button primary" type="submit">Start challenge</button>
+      </form>
     </section>
   `;
+
+  document.querySelector("#joinForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = document.querySelector("#joinName").value.trim();
+    const sessionId = normalizeSessionCode(document.querySelector("#joinCode").value);
+    if (!sessionId) {
+      return;
+    }
+    localStorage.setItem(`az104Name:${sessionId}`, name);
+    window.location.href = `/play/${sessionId}`;
+  });
 }
 
 async function renderTrainer() {
@@ -114,16 +135,16 @@ async function renderTrainer() {
 }
 
 function renderSessionCard(session) {
-  const playUrl = `${window.location.origin}/play/${session.sessionId}`;
+  const joinUrl = `${window.location.origin}/j`;
   return `
     <article class="session-card">
-      <div>
+      <div class="session-main">
         <h3>${escapeHtml(session.title)}</h3>
-        <p>Code <strong>${session.sessionId}</strong></p>
+        <p>Student URL <strong>${escapeHtml(joinUrl)}</strong></p>
+        <div class="session-code">${session.sessionId}</div>
       </div>
-      <img class="qr-small" alt="QR code for ${session.sessionId}" src="/api/qr?text=${encodeURIComponent(playUrl)}" />
       <div class="session-actions">
-        <a class="button" href="/play/${session.sessionId}">Play</a>
+        <a class="button" href="/j">Student join</a>
         <a class="button primary" href="/recap/${session.sessionId}">Recap</a>
         <button class="button danger" data-reset-session="${session.sessionId}">Reset</button>
       </div>
@@ -148,7 +169,7 @@ async function renderPlay(sessionId) {
         </form>
       </header>
       <div class="game-board">
-        <section class="diagram-panel">
+        <section class="diagram-panel play-diagram-panel">
           ${renderInteractiveDiagram()}
         </section>
         <section class="service-bank-panel">
@@ -193,7 +214,7 @@ function renderSubmitted(title) {
 
 async function renderRecap(sessionId) {
   const result = await trainerApi(`/api/sessions/${sessionId}/recap`);
-  const playUrl = `${window.location.origin}/play/${sessionId}`;
+  const joinUrl = `${window.location.origin}/j`;
 
   app.innerHTML = `
     <section class="recap-layout">
@@ -213,8 +234,9 @@ async function renderRecap(sessionId) {
           ${renderStaticDiagram(result, { mode: state.recapMode })}
         </section>
         <aside class="recap-side">
-          <img class="qr-large" alt="QR code for learner link" src="/api/qr?text=${encodeURIComponent(playUrl)}" />
-          <p class="session-link">${escapeHtml(playUrl)}</p>
+          <div class="session-code recap-code">${sessionId}</div>
+          <img class="qr-large" alt="QR code for learner link" src="/api/qr?text=${encodeURIComponent(joinUrl)}" />
+          <p class="session-link">${escapeHtml(joinUrl)}</p>
           <h2>Participants</h2>
           <div class="participant-list">
             ${result.participants.map((item) => `<span>${escapeHtml(item.participantName)}</span>`).join("") || "<p>No submissions yet.</p>"}
@@ -412,6 +434,14 @@ function moveGhost(ghost, x, y) {
 
 function getServiceMap() {
   return new Map(state.config.services.map((service) => [service.id, service]));
+}
+
+function normalizeSessionCode(value) {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9-]/g, "")
+    .slice(0, 24);
 }
 
 async function api(path, options = {}) {

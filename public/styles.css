@@ -43,6 +43,7 @@ a {
 }
 
 .home-layout,
+.join-layout,
 .trainer-layout,
 .play-layout,
 .recap-layout,
@@ -55,7 +56,8 @@ a {
   overflow-x: hidden;
 }
 
-.home-layout {
+.home-layout,
+.join-layout {
   display: grid;
   grid-template-columns: minmax(280px, 0.8fr) minmax(420px, 1.2fr);
   gap: 28px;
@@ -63,6 +65,7 @@ a {
 }
 
 .home-copy,
+.join-copy,
 .submitted {
   display: flex;
   flex-direction: column;
@@ -172,6 +175,34 @@ input {
   color: var(--ink);
 }
 
+.join-panel {
+  align-self: center;
+  display: grid;
+  gap: 16px;
+  width: min(100%, 520px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.join-panel label {
+  display: grid;
+  gap: 7px;
+}
+
+.join-panel span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.join-panel input {
+  min-height: 52px;
+  font-size: 1.05rem;
+}
+
 .control-panel {
   align-items: end;
   justify-content: start;
@@ -206,6 +237,36 @@ input {
   margin-bottom: 4px;
 }
 
+.session-main p {
+  margin-bottom: 10px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.session-main strong {
+  color: var(--ink);
+}
+
+.session-code {
+  display: inline-flex;
+  align-items: center;
+  min-height: 58px;
+  border: 1px solid #9fc0df;
+  border-radius: 8px;
+  padding: 0 16px;
+  background: #eef6ff;
+  color: var(--blue-dark);
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.recap-code {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
 .session-actions {
   grid-column: 1 / -1;
   display: flex;
@@ -234,7 +295,9 @@ input {
 
 .game-board {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 18px;
+  align-items: start;
 }
 
 .diagram-panel,
@@ -258,10 +321,22 @@ input {
   padding: 16px;
 }
 
+.play-diagram-panel {
+  overflow: auto;
+}
+
+.service-bank-panel {
+  position: sticky;
+  top: 18px;
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+}
+
 .diagram {
   position: relative;
   width: 100%;
-  min-height: 820px;
+  min-width: 1080px;
+  min-height: 860px;
   overflow: hidden;
   border: 1px solid #d8e1ec;
   border-radius: 8px;
@@ -382,7 +457,7 @@ input {
 
 .service-bank {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
   max-width: 100%;
   min-width: 0;
@@ -535,11 +610,14 @@ input {
   }
 
   .home-layout,
+  .join-layout,
+  .game-board,
   .recap-grid {
     grid-template-columns: 1fr;
   }
 
   .home-copy,
+  .join-copy,
   .submitted {
     min-height: auto;
   }
@@ -563,6 +641,11 @@ input {
 
   .service-bank {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .service-bank-panel {
+    position: static;
+    max-height: none;
   }
 
   .tray-heading {

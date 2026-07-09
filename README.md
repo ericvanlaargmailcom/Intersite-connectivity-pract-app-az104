@@ -1,11 +1,11 @@
 # AZ-104 Intersite Connectivity Placement Game
 
-Interactive classroom web app for AZ-104 networking practice. Learners open a session link or QR code, enter their name, drag Azure services onto an architecture diagram, and submit. The trainer shows a recap with group consensus first, then reveals the correct solution.
+Interactive classroom web app for AZ-104 networking practice. Learners open the fixed join URL on their laptop, enter their name and session code, drag Azure services onto an architecture diagram, and submit. The trainer shows a recap with group consensus first, then reveals the correct solution.
 
 ## What is included
 
 - Node/Express backend with server-side APIs.
-- Vanilla responsive frontend for learners, trainer control, and recap view.
+- Vanilla laptop-first frontend for learners, trainer control, and recap view.
 - Cosmos DB storage in Azure, with local JSON fallback for development.
 - Bicep template for Azure App Service + Cosmos DB.
 - Azure deployment script.
@@ -42,7 +42,8 @@ npm run dev
 Open:
 
 - Trainer: `http://localhost:3000/trainer`
-- Learner links are generated from the trainer page.
+- Learner join page: `http://localhost:3000/j`
+- The trainer page creates a session code that learners enter on the join page.
 
 Without Cosmos settings, submissions are stored in `.data/local-db.json`.
 
@@ -84,13 +85,16 @@ The Bicep template creates:
 
 - Linux Azure App Service plan
 - Azure Web App
-- Azure Cosmos DB for NoSQL
-- Database `az104-placement-game`
-- Container `sessions` with partition key `/sessionId`
+- Optional Azure Cosmos DB for NoSQL
+- Optional database `az104-placement-game`
+- Optional container `sessions` with partition key `/sessionId`
+
+Set `DEPLOY_COSMOS=false` to deploy the Web App without Cosmos DB. In that mode the app uses the local JSON fallback storage.
 
 ## Routes
 
 - `/trainer` - create/reset sessions, show links and QR codes
+- `/j` or `/join` - fixed learner join page for slide decks
 - `/play/:sessionId` - learner placement game
 - `/recap/:sessionId` - trainer recap and solution reveal
 - `/api/health` - basic health check

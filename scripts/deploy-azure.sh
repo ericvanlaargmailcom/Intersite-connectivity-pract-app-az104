@@ -8,6 +8,11 @@ DEPLOY_COSMOS="${DEPLOY_COSMOS:-true}"
 APP_NAME="${APP_NAME:-}"
 TRAINER_KEY="${TRAINER_KEY:-}"
 
+cleanup() {
+  rm -f app.zip
+}
+trap cleanup EXIT
+
 if [[ -z "$TRAINER_KEY" ]]; then
   echo "Set TRAINER_KEY before running this script."
   exit 1
@@ -41,15 +46,13 @@ if [[ -z "$WEBAPP_NAME" ]]; then
 fi
 
 zip -r app.zip . \
-  -x "node_modules/*" ".git/*" ".data/*" "app.zip"
+  -x "node_modules/*" ".git/*" ".data/*" "app.zip" "infra/main.json" "work/*" "outputs/*"
 
 az webapp deploy \
   --resource-group "$RESOURCE_GROUP" \
   --name "$WEBAPP_NAME" \
   --src-path app.zip \
   --type zip
-
-rm app.zip
 
 az webapp show \
   --resource-group "$RESOURCE_GROUP" \

@@ -161,7 +161,7 @@ app.get("/api/sessions/:sessionId/recap", requireTrainer, async (req, res, next)
   }
 });
 
-app.get(["/trainer", "/play/:sessionId", "/recap/:sessionId"], (req, res) => {
+app.get(["/join", "/j", "/trainer", "/play/:sessionId", "/recap/:sessionId"], (req, res) => {
   res.sendFile("index.html", { root: "public" });
 });
 
