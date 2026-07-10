@@ -214,7 +214,6 @@ function renderSubmitted(title) {
 
 async function renderRecap(sessionId) {
   const result = await trainerApi(`/api/sessions/${sessionId}/recap`);
-  const joinUrl = `${window.location.origin}/j`;
 
   app.innerHTML = `
     <section class="recap-layout">
@@ -235,8 +234,6 @@ async function renderRecap(sessionId) {
         </section>
         <aside class="recap-side">
           <div class="session-code recap-code">${sessionId}</div>
-          <img class="qr-large" alt="QR code for learner link" src="/api/qr?text=${encodeURIComponent(joinUrl)}" />
-          <p class="session-link">${escapeHtml(joinUrl)}</p>
           <h2>Participants</h2>
           <div class="participant-list">
             ${result.participants.map((item) => `<span>${escapeHtml(item.participantName)}</span>`).join("") || "<p>No submissions yet.</p>"}

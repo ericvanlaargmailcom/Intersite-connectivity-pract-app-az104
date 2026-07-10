@@ -274,18 +274,6 @@ input {
   gap: 8px;
 }
 
-.qr-small {
-  width: 92px;
-  height: 92px;
-}
-
-.qr-large {
-  width: min(100%, 260px);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: white;
-}
-
 .recap-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;

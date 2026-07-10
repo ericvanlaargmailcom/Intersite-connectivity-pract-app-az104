@@ -98,8 +98,8 @@ export const gameDefinition = {
       label: "Remote user access",
       hint: "Individual admin laptop into Azure",
       correctServiceId: "p2s-vpn",
-      x: 10,
-      y: 14
+      x: 12,
+      y: 16
     },
     {
       id: "s2s-link",

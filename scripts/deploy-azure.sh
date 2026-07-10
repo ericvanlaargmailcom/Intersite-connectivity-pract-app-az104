@@ -58,11 +58,10 @@ fi
 
 zip -r app.zip . -x "${ZIP_EXCLUDES[@]}"
 
-az webapp deploy \
+az webapp deployment source config-zip \
   --resource-group "$RESOURCE_GROUP" \
   --name "$WEBAPP_NAME" \
-  --src-path app.zip \
-  --type zip
+  --src app.zip
 
 az webapp show \
   --resource-group "$RESOURCE_GROUP" \
