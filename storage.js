@@ -1,6 +1,5 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { CosmosClient } from "@azure/cosmos";
 
 const localDataPath = path.join(process.cwd(), ".data", "local-db.json");
 
@@ -17,21 +16,33 @@ class CosmosStorage {
     const databaseId = process.env.COSMOS_DATABASE_ID || "az104-placement-game";
     const containerId = process.env.COSMOS_CONTAINER_ID || "sessions";
 
-    this.client = new CosmosClient({
-      endpoint: process.env.COSMOS_ENDPOINT,
-      key: process.env.COSMOS_KEY
-    });
-    this.database = this.client.database(databaseId);
-    this.container = this.database.container(containerId);
+    this.databaseId = databaseId;
+    this.containerId = containerId;
+    this.container = null;
+  }
+
+  async getContainer() {
+    if (!this.container) {
+      const { CosmosClient } = await import("@azure/cosmos");
+      const client = new CosmosClient({
+        endpoint: process.env.COSMOS_ENDPOINT,
+        key: process.env.COSMOS_KEY
+      });
+      this.container = client.database(this.databaseId).container(this.containerId);
+    }
+
+    return this.container;
   }
 
   async createSession(session) {
-    await this.container.items.create({ ...session, type: "session" });
+    const container = await this.getContainer();
+    await container.items.create({ ...session, type: "session" });
     return session;
   }
 
   async getSession(sessionId) {
-    const { resource } = await this.container
+    const container = await this.getContainer();
+    const { resource } = await container
       .item(`session:${sessionId}`, sessionId)
       .read();
     return resource || null;
@@ -42,17 +53,20 @@ class CosmosStorage {
       query: "SELECT * FROM c WHERE c.type = @type ORDER BY c.createdAt DESC",
       parameters: [{ name: "@type", value: "session" }]
     };
-    const { resources } = await this.container.items.query(querySpec).fetchAll();
+    const container = await this.getContainer();
+    const { resources } = await container.items.query(querySpec).fetchAll();
     return resources;
   }
 
   async upsertSession(session) {
-    await this.container.items.upsert({ ...session, type: "session" });
+    const container = await this.getContainer();
+    await container.items.upsert({ ...session, type: "session" });
     return session;
   }
 
   async saveSubmission(submission) {
-    await this.container.items.upsert({ ...submission, type: "submission" });
+    const container = await this.getContainer();
+    await container.items.upsert({ ...submission, type: "submission" });
     return submission;
   }
 
@@ -64,7 +78,8 @@ class CosmosStorage {
         { name: "@sessionId", value: sessionId }
       ]
     };
-    const { resources } = await this.container.items
+    const container = await this.getContainer();
+    const { resources } = await container.items
       .query(querySpec, { partitionKey: sessionId })
       .fetchAll();
     return resources;
@@ -72,9 +87,10 @@ class CosmosStorage {
 
   async clearSubmissions(sessionId) {
     const submissions = await this.listSubmissions(sessionId);
+    const container = await this.getContainer();
     await Promise.all(
       submissions.map((submission) =>
-        this.container.item(submission.id, sessionId).delete()
+        container.item(submission.id, sessionId).delete()
       )
     );
   }

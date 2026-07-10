@@ -54,9 +54,11 @@ az webapp config appsettings set \
 ZIP_EXCLUDES=(".git/*" ".data/*" "app.zip" "infra/main.json" "work/*" "outputs/*")
 if [[ "$DEPLOY_REMOTE_BUILD" == "true" ]]; then
   ZIP_EXCLUDES+=("node_modules/*")
+elif [[ "$DEPLOY_COSMOS" == "false" ]]; then
+  ZIP_EXCLUDES+=("node_modules/@azure/*" "node_modules/@azure-rest/*" "node_modules/@typespec/*")
 fi
 
-zip -r app.zip . -x "${ZIP_EXCLUDES[@]}"
+zip -rq app.zip . -x "${ZIP_EXCLUDES[@]}"
 
 az webapp deployment source config-zip \
   --resource-group "$RESOURCE_GROUP" \
