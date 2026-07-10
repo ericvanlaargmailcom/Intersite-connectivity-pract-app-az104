@@ -279,7 +279,7 @@ function renderStaticDiagram(result = {}, options = {}) {
           const meta = mode === "solution"
             ? "Correct"
             : consensus?.topChoice
-              ? `${consensus.topChoice.percentage}% · ${consensus.topChoice.count} votes`
+              ? `${consensus.topChoice.percentage}% · ${formatVoteCount(consensus.topChoice.count, result.submissionCount)}`
               : "No votes";
           return `<div class="drop-slot static" style="left:${slot.x}%;top:${slot.y}%"><span>${escapeHtml(slot.label)}</span>${service ? renderPlacedService(service, meta) : `<small>${escapeHtml(slot.hint)}</small>`}</div>`;
         })
@@ -453,6 +453,12 @@ function normalizeParticipantName(name) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 48) || "anonymous";
+}
+
+function formatVoteCount(count, total) {
+  const safeTotal = Number.isFinite(total) && total > 0 ? total : count;
+  const voteLabel = safeTotal === 1 ? "vote" : "votes";
+  return `${count} of ${safeTotal} ${voteLabel}`;
 }
 
 async function api(path, options = {}) {
