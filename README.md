@@ -68,7 +68,7 @@ Requirements:
 
 - Azure CLI
 - A logged-in Azure subscription
-- Node.js 20 runtime support in App Service
+- Node.js 22 LTS runtime support in App Service
 
 Deploy infrastructure and app:
 

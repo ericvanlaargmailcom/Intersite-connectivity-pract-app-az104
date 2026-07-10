@@ -10,7 +10,7 @@
     "check": "node --check server.js && node --check public/app.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "@azure/cosmos": "^4.3.0",
