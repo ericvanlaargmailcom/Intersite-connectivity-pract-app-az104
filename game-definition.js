@@ -43,6 +43,14 @@ export const gameDefinition = {
       description: "Azure gateway resource that terminates VPN connections."
     },
     {
+      id: "expressroute-gateway",
+      name: "ExpressRoute Gateway",
+      shortName: "ER Gateway",
+      icon: "ERG",
+      iconPath: "/assets/icons/vpn-gateway.svg",
+      description: "Virtual network gateway used to connect Azure VNets to ExpressRoute circuits."
+    },
+    {
       id: "service-endpoint",
       name: "Service Endpoint",
       shortName: "Service Endpoint",
@@ -119,11 +127,19 @@ export const gameDefinition = {
     },
     {
       id: "hub-gateway",
-      label: "Hub gateway subnet",
+      label: "VPN gateway subnet",
       hint: "Terminates VPN connectivity in Azure",
       correctServiceId: "vpn-gateway",
-      x: 43,
+      x: 42,
       y: 53
+    },
+    {
+      id: "expressroute-gateway",
+      label: "ExpressRoute gateway subnet",
+      hint: "Connects the hub VNet to the private circuit",
+      correctServiceId: "expressroute-gateway",
+      x: 42,
+      y: 65
     },
     {
       id: "hub-security",

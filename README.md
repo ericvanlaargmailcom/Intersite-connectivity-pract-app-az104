@@ -13,10 +13,11 @@ Interactive classroom web app for AZ-104 networking practice. Learners open the 
 
 ## Game design
 
-Learners place 10 services onto 10 fixed locations:
+Learners place 11 services onto 11 fixed locations:
 
 - Site-to-site VPN
 - ExpressRoute
+- ExpressRoute Gateway
 - Point-to-site VPN
 - Azure Firewall
 - VPN Gateway
