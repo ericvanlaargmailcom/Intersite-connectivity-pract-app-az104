@@ -2,12 +2,9 @@ const state = {
   config: null,
   placements: {},
   selectedServiceId: null,
-  participantId: localStorage.getItem("az104ParticipantId") || crypto.randomUUID(),
   trainerKey: localStorage.getItem("az104TrainerKey") || "",
   recapMode: "consensus"
 };
-
-localStorage.setItem("az104ParticipantId", state.participantId);
 
 const app = document.querySelector("#app");
 
@@ -194,7 +191,7 @@ async function renderPlay(sessionId) {
       method: "POST",
       body: JSON.stringify({
         participantName: name,
-        participantId: state.participantId,
+        participantId: getParticipantId(sessionId, name),
         placements: state.placements
       })
     });
@@ -439,6 +436,23 @@ function normalizeSessionCode(value) {
     .toUpperCase()
     .replace(/[^A-Z0-9-]/g, "")
     .slice(0, 24);
+}
+
+function getParticipantId(sessionId, name) {
+  const nameKey = normalizeParticipantName(name);
+  const storageKey = `az104ParticipantId:${sessionId}:${nameKey}`;
+  const participantId = localStorage.getItem(storageKey) || crypto.randomUUID();
+  localStorage.setItem(storageKey, participantId);
+  return participantId;
+}
+
+function normalizeParticipantName(name) {
+  return String(name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48) || "anonymous";
 }
 
 async function api(path, options = {}) {
