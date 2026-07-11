@@ -536,7 +536,11 @@ input {
   grid-template-columns: 38px minmax(0, 1fr);
   min-height: 50px;
   padding: 5px;
-  cursor: pointer;
+  cursor: grab;
+}
+
+.drop-slot.static .placed-service {
+  cursor: default;
 }
 
 .placed-service strong,

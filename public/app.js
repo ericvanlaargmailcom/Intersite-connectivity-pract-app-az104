@@ -318,7 +318,6 @@ function renderServiceBank() {
     .filter((service) => !placedIds.has(service.id))
     .map((service) => renderServiceCard(service))
     .join("");
-  wireServiceCards();
   refreshSlots();
 }
 
@@ -331,9 +330,9 @@ function renderServiceCard(service) {
   `;
 }
 
-function renderPlacedService(service, meta = "") {
+function renderPlacedService(service, meta = "", slotId = "") {
   return `
-    <div class="placed-service">
+    <div class="placed-service" data-service-id="${service.id}" ${slotId ? `data-source-slot-id="${slotId}"` : ""}>
       ${renderServiceIcon(service)}
       <span>${escapeHtml(service.shortName)}</span>
       ${meta ? `<small>${escapeHtml(meta)}</small>` : ""}
@@ -368,6 +367,9 @@ function wireServiceCards() {
     card.addEventListener("click", () => selectService(card.dataset.serviceId));
     card.addEventListener("pointerdown", startPointerDrag);
   });
+  document.querySelectorAll(".placed-service[data-source-slot-id]").forEach((card) => {
+    card.addEventListener("pointerdown", startPointerDrag);
+  });
 }
 
 function selectService(serviceId) {
@@ -377,7 +379,22 @@ function selectService(serviceId) {
   });
 }
 
-function placeService(slotId, serviceId) {
+function placeService(slotId, serviceId, sourceSlotId = null) {
+  if (sourceSlotId) {
+    if (sourceSlotId === slotId) return;
+
+    const replacedServiceId = state.placements[slotId];
+    state.placements[slotId] = serviceId;
+    if (replacedServiceId) {
+      state.placements[sourceSlotId] = replacedServiceId;
+    } else {
+      delete state.placements[sourceSlotId];
+    }
+    state.selectedServiceId = null;
+    renderServiceBank();
+    return;
+  }
+
   for (const [existingSlotId, existingServiceId] of Object.entries(state.placements)) {
     if (existingServiceId === serviceId) {
       delete state.placements[existingSlotId];
@@ -394,18 +411,21 @@ function refreshSlots() {
     const slotConfig = state.config.slots.find((item) => item.id === slot.dataset.slotId);
     const service = serviceById.get(state.placements[slot.dataset.slotId]);
     slot.innerHTML = service
-      ? renderPlacedService(service, "Tap to remove")
+      ? renderPlacedService(service, "Drag to move · Click to remove", slot.dataset.slotId)
       : `<span>${escapeHtml(slotConfig.label)}</span><small>${escapeHtml(slotConfig.hint)}</small>`;
   });
+  wireServiceCards();
 }
 
 function startPointerDrag(event) {
   if (event.button !== 0) return;
+  event.preventDefault();
 
   cancelActiveDrag?.();
 
   const source = event.currentTarget;
   const serviceId = source.dataset.serviceId;
+  const sourceSlotId = source.dataset.sourceSlotId || null;
   const ghost = source.cloneNode(true);
   ghost.classList.add("drag-ghost");
   document.body.appendChild(ghost);
@@ -435,7 +455,7 @@ function startPointerDrag(event) {
     const target = document.elementFromPoint(upEvent.clientX, upEvent.clientY)?.closest(".drop-slot");
     finishDrag();
     if (target?.dataset.slotId) {
-      placeService(target.dataset.slotId, serviceId);
+      placeService(target.dataset.slotId, serviceId, sourceSlotId);
     }
   };
 
