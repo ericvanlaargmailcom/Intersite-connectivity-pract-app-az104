@@ -7,6 +7,7 @@ const state = {
 };
 
 const app = document.querySelector("#app");
+let cancelActiveDrag = null;
 
 init().catch((error) => renderError(error));
 
@@ -399,6 +400,10 @@ function refreshSlots() {
 }
 
 function startPointerDrag(event) {
+  if (event.button !== 0) return;
+
+  cancelActiveDrag?.();
+
   const source = event.currentTarget;
   const serviceId = source.dataset.serviceId;
   const ghost = source.cloneNode(true);
@@ -408,18 +413,42 @@ function startPointerDrag(event) {
   moveGhost(ghost, event.clientX, event.clientY);
 
   const onMove = (moveEvent) => moveGhost(ghost, moveEvent.clientX, moveEvent.clientY);
-  const onUp = (upEvent) => {
+  let finished = false;
+  const cleanupTimer = window.setTimeout(() => finishDrag(), 5000);
+
+  const finishDrag = () => {
+    if (finished) return;
+    finished = true;
+    window.clearTimeout(cleanupTimer);
     source.removeEventListener("pointermove", onMove);
     source.removeEventListener("pointerup", onUp);
+    source.removeEventListener("pointercancel", onCancel);
+    source.removeEventListener("lostpointercapture", onCancel);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onCancel);
+    window.removeEventListener("blur", onCancel);
     ghost.remove();
+    if (cancelActiveDrag === finishDrag) cancelActiveDrag = null;
+  };
+
+  const onUp = (upEvent) => {
     const target = document.elementFromPoint(upEvent.clientX, upEvent.clientY)?.closest(".drop-slot");
+    finishDrag();
     if (target?.dataset.slotId) {
       placeService(target.dataset.slotId, serviceId);
     }
   };
 
+  const onCancel = () => finishDrag();
+  cancelActiveDrag = finishDrag;
+
   source.addEventListener("pointermove", onMove);
   source.addEventListener("pointerup", onUp);
+  source.addEventListener("pointercancel", onCancel);
+  source.addEventListener("lostpointercapture", onCancel);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onCancel);
+  window.addEventListener("blur", onCancel);
 }
 
 function moveGhost(ghost, x, y) {
