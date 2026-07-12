@@ -411,6 +411,35 @@ input {
   top: 53%;
 }
 
+.web-vm-cluster {
+  left: 86%;
+  top: 30%;
+  gap: 18px;
+}
+
+.web-vm {
+  white-space: nowrap;
+}
+
+.web-vm-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.web-badge {
+  position: absolute;
+  right: -9px;
+  top: -5px;
+  border: 1px solid white;
+  border-radius: 4px;
+  padding: 2px 3px;
+  background: #0f6cbd;
+  color: white;
+  font-size: 0.42rem;
+  line-height: 1;
+}
+
 .paas-resources {
   left: 82%;
   top: 88%;

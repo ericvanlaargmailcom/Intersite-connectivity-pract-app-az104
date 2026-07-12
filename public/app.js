@@ -305,6 +305,17 @@ function renderDiagramBackdrop() {
         </div>
       `).join("")}
     </div>
+    <div class="diagram-resource-group web-vm-cluster" aria-label="Web server virtual machines behind the application gateway">
+      ${[1, 2].map((number) => `
+        <div class="diagram-resource compact web-vm">
+          <div class="web-vm-icon">
+            <img src="/assets/icons/virtual-machine.svg" alt="" />
+            <span class="web-badge">WEB</span>
+          </div>
+          <span>Web VM ${number}</span>
+        </div>
+      `).join("")}
+    </div>
     <div class="diagram-resource-group paas-resources" aria-label="Azure PaaS resources">
       <div class="diagram-resource">
         <img src="/assets/icons/storage-account.svg" alt="" />
@@ -322,6 +333,7 @@ function renderDiagramBackdrop() {
       <path d="M24 76 C31 76, 36 70, 42 65" />
       <path d="M47 53 C53 44, 56 42, 60 44" />
       <path d="M60 44 C66 46, 70 49, 75 52" />
+      <path d="M86 22 C86 24, 86 25, 86 27" />
       <path d="M86 48 C86 49, 86 50, 86 51" />
       <path d="M79 56 C76 64, 74 71, 72 79" />
       <path d="M88 56 C90 65, 91 72, 91 79" />
