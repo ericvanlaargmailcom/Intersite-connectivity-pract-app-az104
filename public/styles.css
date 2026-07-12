@@ -395,6 +395,55 @@ input {
   background: var(--violet);
 }
 
+.diagram-resource-group {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.vm-cluster {
+  left: 86%;
+  top: 60.5%;
+}
+
+.paas-resources {
+  left: 82%;
+  top: 88%;
+  gap: 42px;
+}
+
+.diagram-resource {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  min-width: 54px;
+  color: var(--ink);
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+}
+
+.diagram-resource img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.diagram-resource.compact {
+  min-width: 32px;
+}
+
+.diagram-resource.compact img {
+  width: 25px;
+  height: 25px;
+}
+
 .network-lines {
   position: absolute;
   inset: 0;

@@ -297,6 +297,24 @@ function renderDiagramBackdrop() {
     <div class="zone zone-hub">Hub VNet</div>
     <div class="zone zone-spoke">Spoke VNet</div>
     <div class="zone zone-paas">Azure PaaS</div>
+    <div class="diagram-resource-group vm-cluster" aria-label="Virtual machines behind the load balancer">
+      ${[1, 2, 3].map((number) => `
+        <div class="diagram-resource compact">
+          <img src="/assets/icons/virtual-machine.svg" alt="" />
+          <span>VM ${number}</span>
+        </div>
+      `).join("")}
+    </div>
+    <div class="diagram-resource-group paas-resources" aria-label="Azure PaaS resources">
+      <div class="diagram-resource">
+        <img src="/assets/icons/storage-account.svg" alt="" />
+        <span>Storage</span>
+      </div>
+      <div class="diagram-resource">
+        <img src="/assets/icons/app-service.svg" alt="" />
+        <span>Web App</span>
+      </div>
+    </div>
     <svg class="network-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       <path d="M10 20 C25 21, 31 41, 42 53" />
       <path d="M18 45 C28 45, 34 49, 42 53" />
