@@ -98,7 +98,7 @@ The live classroom app is hosted at:
 
 - `https://az104-ic-game-app.azurewebsites.net/j`
 
-This App Service intentionally uses the local JSON fallback storage. Its startup command copies `package.local-storage.json` over `package.json`, installs only the small runtime dependency set, and starts the app:
+This App Service runs in Belgium Central on the `az104-ic-game-belgium-plan` Linux B1 plan. It intentionally uses the local JSON fallback storage. Its startup command copies `package.local-storage.json` over `package.json`, installs only the small runtime dependency set, and starts the app:
 
 ```bash
 cp package.local-storage.json package.json && npm install --omit=dev && npm start
