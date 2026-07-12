@@ -176,7 +176,7 @@ export const gameDefinition = {
     {
       id: "paas-public-path",
       label: "PaaS via Azure backbone",
-      hint: "Subnet reaches supported service using service endpoint",
+      hint: "Subnet reaches supported service",
       correctServiceId: "service-endpoint",
       x: 72,
       y: 79
@@ -184,7 +184,7 @@ export const gameDefinition = {
     {
       id: "paas-private-ip",
       label: "PaaS private IP",
-      hint: "Private endpoint NIC inside the VNet",
+      hint: "NIC inside the VNet",
       correctServiceId: "private-endpoint",
       x: 91,
       y: 79
