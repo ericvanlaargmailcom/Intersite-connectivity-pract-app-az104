@@ -92,6 +92,20 @@ The Bicep template creates:
 
 Set `DEPLOY_COSMOS=false` to deploy the Web App without Cosmos DB. In that mode the app uses the local JSON fallback storage.
 
+### Current classroom App Service
+
+The live classroom app is hosted at:
+
+- `https://az104-ic-game-app.azurewebsites.net/j`
+
+This App Service intentionally uses the local JSON fallback storage. Its startup command copies `package.local-storage.json` over `package.json`, installs only the small runtime dependency set, and starts the app:
+
+```bash
+cp package.local-storage.json package.json && npm install --omit=dev && npm start
+```
+
+That keeps App Service cold starts fast while the Cosmos-ready package remains available for a future persistent storage deployment.
+
 ## Routes
 
 - `/trainer` - create/reset sessions, show links and QR codes
