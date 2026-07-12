@@ -175,19 +175,19 @@ export const gameDefinition = {
     },
     {
       id: "paas-public-path",
-      label: "PaaS via Azure backbone",
+      label: "Service-enabled subnet",
       hint: "Subnet reaches supported service",
       correctServiceId: "service-endpoint",
-      x: 72,
-      y: 79
+      x: 85,
+      y: 70
     },
     {
       id: "paas-private-ip",
-      label: "PaaS private IP",
+      label: "Private endpoint NIC",
       hint: "NIC inside the VNet",
       correctServiceId: "private-endpoint",
-      x: 91,
-      y: 79
+      x: 85,
+      y: 84
     }
   ]
 };

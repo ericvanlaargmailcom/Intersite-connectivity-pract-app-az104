@@ -383,15 +383,15 @@ input {
   left: 73%;
   top: 6%;
   width: 24%;
-  height: 57%;
+  height: 86%;
   background: var(--mint);
 }
 
 .zone-paas {
-  left: 65%;
-  top: 70%;
-  width: 32%;
-  height: 22%;
+  left: 39%;
+  top: 72%;
+  width: 27%;
+  height: 20%;
   background: var(--violet);
 }
 
@@ -441,8 +441,8 @@ input {
 }
 
 .paas-resources {
-  left: 82%;
-  top: 88%;
+  left: 52.5%;
+  top: 87%;
   gap: 42px;
 }
 
