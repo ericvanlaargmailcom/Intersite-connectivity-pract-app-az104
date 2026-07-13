@@ -633,6 +633,10 @@ input {
   cursor: default;
 }
 
+.drop-slot.static.reveal-slot .placed-service[data-source-slot-id] {
+  cursor: grab;
+}
+
 .reveal-slot .placed-service {
   transition: border-color 120ms ease, box-shadow 120ms ease, outline-color 120ms ease;
 }

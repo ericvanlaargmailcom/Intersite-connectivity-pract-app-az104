@@ -313,7 +313,7 @@ function renderStaticDiagram(result = {}, options = {}) {
             : consensus?.topChoice
               ? `${consensus.topChoice.percentage}% · ${formatVoteCount(consensus.topChoice.count, result.submissionCount)}`
               : "No votes";
-          return `<div class="drop-slot static ${mode === "solution" ? "reveal-slot" : ""}" data-slot-id="${slot.id}" style="left:${slot.x}%;top:${slot.y}%"><span>${escapeHtml(slot.label)}</span>${service ? renderPlacedService(service, meta, "", getRevealStatusClass(revealCheck)) : `<small>${escapeHtml(slot.hint)}</small>`}</div>`;
+          return `<div class="drop-slot static ${mode === "solution" ? "reveal-slot" : ""}" data-slot-id="${slot.id}" style="left:${slot.x}%;top:${slot.y}%"><span>${escapeHtml(slot.label)}</span>${service ? renderPlacedService(service, meta, revealCheck ? slot.id : "", getRevealStatusClass(revealCheck)) : `<small>${escapeHtml(slot.hint)}</small>`}</div>`;
         })
         .join("")}
     </div>
@@ -443,6 +443,9 @@ function wireRevealInteractions(result, sessionId) {
     card.dataset.revealCard = "true";
     card.addEventListener("pointerdown", (event) => startRevealDrag(event, result, sessionId));
   });
+  document.querySelectorAll(".reveal-slot .placed-service[data-source-slot-id]").forEach((card) => {
+    card.addEventListener("pointerdown", (event) => startRevealDrag(event, result, sessionId));
+  });
 }
 
 function selectService(serviceId) {
@@ -552,6 +555,7 @@ function startRevealDrag(event, result, sessionId) {
 
   const source = event.currentTarget;
   const serviceId = source.dataset.serviceId;
+  const sourceSlotId = source.dataset.sourceSlotId || null;
   const ghost = source.cloneNode(true);
   ghost.classList.add("drag-ghost");
   document.body.appendChild(ghost);
@@ -583,6 +587,9 @@ function startRevealDrag(event, result, sessionId) {
     if (!target?.dataset.slotId) return;
 
     const slotId = target.dataset.slotId;
+    if (sourceSlotId && sourceSlotId !== slotId) {
+      delete state.revealChecks[sourceSlotId];
+    }
     state.revealChecks[slotId] = {
       serviceId,
       isCorrect: result.solution?.[slotId] === serviceId
