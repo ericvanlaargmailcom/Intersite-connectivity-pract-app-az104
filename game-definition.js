@@ -151,8 +151,8 @@ export const gameDefinition = {
     },
     {
       id: "hub-spoke-connection",
-      label: "Hub to spoke connection",
-      hint: "Azure backbone VNet-to-VNet connectivity",
+      label: "Hub to spoke VNet path",
+      hint: "Connect hub and spoke VNets using the Azure backbone",
       correctServiceId: "vnet-peering",
       x: 69,
       y: 50
