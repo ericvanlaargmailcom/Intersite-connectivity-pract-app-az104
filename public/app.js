@@ -1,6 +1,7 @@
 const state = {
   config: null,
   placements: {},
+  revealChecks: {},
   selectedServiceId: null,
   trainerKey: localStorage.getItem("az104TrainerKey") || "",
   recapMode: "consensus"
@@ -212,21 +213,23 @@ function renderSubmitted(title) {
 
 async function renderRecap(sessionId) {
   const result = await trainerApi(`/api/sessions/${sessionId}/recap`);
+  const isRevealMode = state.recapMode === "solution";
 
   app.innerHTML = `
     <section class="recap-layout">
       <header class="recap-header">
         <div>
           <p class="eyebrow">${escapeHtml(result.session.title)} · ${result.submissionCount} submissions</p>
-          <h1>${state.recapMode === "solution" ? "Correct solution" : "Group consensus"}</h1>
+          <h1>${isRevealMode ? "Reveal the solution" : "Group consensus"}</h1>
         </div>
         <div class="recap-actions">
           <button class="button" id="refreshRecap">Refresh</button>
-          <button class="button primary" id="toggleSolution">${state.recapMode === "solution" ? "Show consensus" : "Reveal solution"}</button>
+          <button class="button primary" id="toggleSolution">${isRevealMode ? "Show consensus" : "Reveal solution"}</button>
           <button class="button danger" id="resetSession">Reset</button>
         </div>
       </header>
-      <div class="recap-grid">
+      <div class="recap-grid ${isRevealMode ? "reveal-grid" : ""}">
+        ${isRevealMode ? renderRevealServicePanel() : ""}
         <section class="diagram-panel recap-diagram">
           ${renderStaticDiagram(result, { mode: state.recapMode })}
         </section>
@@ -244,13 +247,36 @@ async function renderRecap(sessionId) {
   document.querySelector("#refreshRecap").addEventListener("click", () => renderRecap(sessionId));
   document.querySelector("#toggleSolution").addEventListener("click", () => {
     state.recapMode = state.recapMode === "solution" ? "consensus" : "solution";
+    state.revealChecks = {};
     renderRecap(sessionId);
   });
   document.querySelector("#resetSession").addEventListener("click", async () => {
     await trainerApi(`/api/sessions/${sessionId}/reset`, { method: "POST" });
     state.recapMode = "consensus";
+    state.revealChecks = {};
     await renderRecap(sessionId);
   });
+
+  if (isRevealMode) {
+    wireRevealInteractions(result, sessionId);
+  }
+}
+
+function renderRevealServicePanel() {
+  return `
+    <aside class="service-bank-panel reveal-bank-panel">
+      <div class="tray-heading">
+        <h2>Reveal services</h2>
+        <p>Drag a service to test the group consensus.</p>
+      </div>
+      <div class="service-bank reveal-service-bank">
+        ${state.config.services
+          .filter((service) => !service.distractor)
+          .map((service) => renderServiceCard(service))
+          .join("")}
+      </div>
+    </aside>
+  `;
 }
 
 function renderInteractiveDiagram() {
@@ -275,18 +301,28 @@ function renderStaticDiagram(result = {}, options = {}) {
       ${state.config.slots
         .map((slot) => {
           const consensus = consensusBySlot.get(slot.id);
-          const serviceId = mode === "solution" ? result.solution?.[slot.id] : consensus?.topChoice?.serviceId;
+          const revealCheck = mode === "solution" ? state.revealChecks[slot.id] : null;
+          const serviceId = revealCheck?.serviceId || consensus?.topChoice?.serviceId;
           const service = serviceById.get(serviceId);
           const meta = mode === "solution"
-            ? "Correct"
+            ? revealCheck
+              ? (revealCheck.isCorrect ? "Correct" : "Try another place")
+              : consensus?.topChoice
+                ? `${consensus.topChoice.percentage}% · ${formatVoteCount(consensus.topChoice.count, result.submissionCount)}`
+                : "No votes"
             : consensus?.topChoice
               ? `${consensus.topChoice.percentage}% · ${formatVoteCount(consensus.topChoice.count, result.submissionCount)}`
               : "No votes";
-          return `<div class="drop-slot static" style="left:${slot.x}%;top:${slot.y}%"><span>${escapeHtml(slot.label)}</span>${service ? renderPlacedService(service, meta) : `<small>${escapeHtml(slot.hint)}</small>`}</div>`;
+          return `<div class="drop-slot static ${mode === "solution" ? "reveal-slot" : ""}" data-slot-id="${slot.id}" style="left:${slot.x}%;top:${slot.y}%"><span>${escapeHtml(slot.label)}</span>${service ? renderPlacedService(service, meta, "", getRevealStatusClass(revealCheck)) : `<small>${escapeHtml(slot.hint)}</small>`}</div>`;
         })
         .join("")}
     </div>
   `;
+}
+
+function getRevealStatusClass(revealCheck) {
+  if (!revealCheck) return "";
+  return revealCheck.isCorrect ? "is-correct" : "is-incorrect";
 }
 
 function renderDiagramBackdrop() {
@@ -360,9 +396,9 @@ function renderServiceCard(service) {
   `;
 }
 
-function renderPlacedService(service, meta = "", slotId = "") {
+function renderPlacedService(service, meta = "", slotId = "", extraClass = "") {
   return `
-    <div class="placed-service" data-service-id="${service.id}" ${slotId ? `data-source-slot-id="${slotId}"` : ""}>
+    <div class="placed-service ${extraClass}" data-service-id="${service.id}" ${slotId ? `data-source-slot-id="${slotId}"` : ""}>
       ${renderServiceIcon(service)}
       <span>${escapeHtml(service.shortName)}</span>
       ${meta ? `<small>${escapeHtml(meta)}</small>` : ""}
@@ -393,12 +429,19 @@ function wirePlacementInteractions() {
 }
 
 function wireServiceCards() {
-  document.querySelectorAll(".service-card").forEach((card) => {
+  document.querySelectorAll(".service-card:not([data-reveal-card])").forEach((card) => {
     card.addEventListener("click", () => selectService(card.dataset.serviceId));
     card.addEventListener("pointerdown", startPointerDrag);
   });
   document.querySelectorAll(".placed-service[data-source-slot-id]").forEach((card) => {
     card.addEventListener("pointerdown", startPointerDrag);
+  });
+}
+
+function wireRevealInteractions(result, sessionId) {
+  document.querySelectorAll(".reveal-bank-panel .service-card").forEach((card) => {
+    card.dataset.revealCard = "true";
+    card.addEventListener("pointerdown", (event) => startRevealDrag(event, result, sessionId));
   });
 }
 
@@ -487,6 +530,64 @@ function startPointerDrag(event) {
     if (target?.dataset.slotId) {
       placeService(target.dataset.slotId, serviceId, sourceSlotId);
     }
+  };
+
+  const onCancel = () => finishDrag();
+  cancelActiveDrag = finishDrag;
+
+  source.addEventListener("pointermove", onMove);
+  source.addEventListener("pointerup", onUp);
+  source.addEventListener("pointercancel", onCancel);
+  source.addEventListener("lostpointercapture", onCancel);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onCancel);
+  window.addEventListener("blur", onCancel);
+}
+
+function startRevealDrag(event, result, sessionId) {
+  if (event.button !== 0) return;
+  event.preventDefault();
+
+  cancelActiveDrag?.();
+
+  const source = event.currentTarget;
+  const serviceId = source.dataset.serviceId;
+  const ghost = source.cloneNode(true);
+  ghost.classList.add("drag-ghost");
+  document.body.appendChild(ghost);
+  source.setPointerCapture(event.pointerId);
+  moveGhost(ghost, event.clientX, event.clientY);
+
+  const onMove = (moveEvent) => moveGhost(ghost, moveEvent.clientX, moveEvent.clientY);
+  let finished = false;
+  const cleanupTimer = window.setTimeout(() => finishDrag(), 5000);
+
+  const finishDrag = () => {
+    if (finished) return;
+    finished = true;
+    window.clearTimeout(cleanupTimer);
+    source.removeEventListener("pointermove", onMove);
+    source.removeEventListener("pointerup", onUp);
+    source.removeEventListener("pointercancel", onCancel);
+    source.removeEventListener("lostpointercapture", onCancel);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onCancel);
+    window.removeEventListener("blur", onCancel);
+    ghost.remove();
+    if (cancelActiveDrag === finishDrag) cancelActiveDrag = null;
+  };
+
+  const onUp = (upEvent) => {
+    const target = document.elementFromPoint(upEvent.clientX, upEvent.clientY)?.closest(".reveal-slot[data-slot-id]");
+    finishDrag();
+    if (!target?.dataset.slotId) return;
+
+    const slotId = target.dataset.slotId;
+    state.revealChecks[slotId] = {
+      serviceId,
+      isCorrect: result.solution?.[slotId] === serviceId
+    };
+    renderRecap(sessionId);
   };
 
   const onCancel = () => finishDrag();
