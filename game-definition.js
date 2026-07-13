@@ -127,16 +127,16 @@ export const gameDefinition = {
     },
     {
       id: "hub-gateway",
-      label: "VPN gateway subnet",
-      hint: "Terminates VPN connectivity in Azure",
+      label: "Encrypted tunnel landing",
+      hint: "Hub subnet receives branch tunnel traffic",
       correctServiceId: "vpn-gateway",
       x: 42,
       y: 53
     },
     {
       id: "expressroute-gateway",
-      label: "ExpressRoute gateway subnet",
-      hint: "Connects the hub VNet to the private circuit",
+      label: "Dedicated circuit landing",
+      hint: "Hub subnet connects to the private WAN path",
       correctServiceId: "expressroute-gateway",
       x: 42,
       y: 65
@@ -175,16 +175,16 @@ export const gameDefinition = {
     },
     {
       id: "paas-public-path",
-      label: "Service-enabled subnet",
-      hint: "Subnet reaches supported service",
+      label: "Trusted platform path",
+      hint: "Subnet identity is accepted by a PaaS resource",
       correctServiceId: "service-endpoint",
       x: 85,
       y: 70
     },
     {
       id: "paas-private-ip",
-      label: "Private endpoint NIC",
-      hint: "NIC inside the VNet",
+      label: "Private PaaS address",
+      hint: "Dedicated private IP appears inside the VNet",
       correctServiceId: "private-endpoint",
       x: 85,
       y: 84
