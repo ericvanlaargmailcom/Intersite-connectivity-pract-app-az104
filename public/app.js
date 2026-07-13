@@ -2,6 +2,7 @@ const state = {
   config: null,
   placements: {},
   revealChecks: {},
+  selectedParticipantId: null,
   selectedServiceId: null,
   trainerKey: localStorage.getItem("az104TrainerKey") || "",
   recapMode: "consensus"
@@ -213,14 +214,24 @@ function renderSubmitted(title) {
 
 async function renderRecap(sessionId) {
   const result = await trainerApi(`/api/sessions/${sessionId}/recap`);
-  const isRevealMode = state.recapMode === "solution";
+  const selectedParticipant = result.participants.find((item) => item.participantId === state.selectedParticipantId) || null;
+  if (state.selectedParticipantId && !selectedParticipant) {
+    state.selectedParticipantId = null;
+  }
+  const isParticipantMode = Boolean(selectedParticipant);
+  const isRevealMode = state.recapMode === "solution" && !isParticipantMode;
+  const recapTitle = isParticipantMode
+    ? `${selectedParticipant.participantName}'s choices`
+    : isRevealMode
+      ? "Reveal the solution"
+      : "Group consensus";
 
   app.innerHTML = `
     <section class="recap-layout">
       <header class="recap-header">
         <div>
           <p class="eyebrow">${escapeHtml(result.session.title)} · ${result.submissionCount} submissions</p>
-          <h1>${isRevealMode ? "Reveal the solution" : "Group consensus"}</h1>
+          <h1>${escapeHtml(recapTitle)}</h1>
         </div>
         <div class="recap-actions">
           <button class="button" id="refreshRecap">Refresh</button>
@@ -231,13 +242,14 @@ async function renderRecap(sessionId) {
       <div class="recap-grid ${isRevealMode ? "reveal-grid" : ""}">
         ${isRevealMode ? renderRevealServicePanel() : ""}
         <section class="diagram-panel recap-diagram">
-          ${renderStaticDiagram(result, { mode: state.recapMode })}
+          ${isParticipantMode ? renderParticipantDiagram(selectedParticipant) : renderStaticDiagram(result, { mode: state.recapMode })}
         </section>
         <aside class="recap-side">
           <div class="session-code recap-code">${sessionId}</div>
           <h2>Participants</h2>
+          ${isParticipantMode ? `<button class="button participant-back" id="showConsensus" type="button">Show group consensus</button>` : ""}
           <div class="participant-list">
-            ${result.participants.map((item) => `<span>${escapeHtml(item.participantName)}</span>`).join("") || "<p>No submissions yet.</p>"}
+            ${result.participants.map((item) => `<button class="participant-pill ${item.participantId === state.selectedParticipantId ? "active" : ""}" data-participant-id="${escapeHtml(item.participantId)}" type="button">${escapeHtml(item.participantName)}</button>`).join("") || "<p>No submissions yet.</p>"}
           </div>
         </aside>
       </div>
@@ -246,15 +258,30 @@ async function renderRecap(sessionId) {
 
   document.querySelector("#refreshRecap").addEventListener("click", () => renderRecap(sessionId));
   document.querySelector("#toggleSolution").addEventListener("click", () => {
+    state.selectedParticipantId = null;
     state.recapMode = state.recapMode === "solution" ? "consensus" : "solution";
     state.revealChecks = {};
     renderRecap(sessionId);
   });
   document.querySelector("#resetSession").addEventListener("click", async () => {
     await trainerApi(`/api/sessions/${sessionId}/reset`, { method: "POST" });
+    state.selectedParticipantId = null;
     state.recapMode = "consensus";
     state.revealChecks = {};
     await renderRecap(sessionId);
+  });
+  document.querySelector("#showConsensus")?.addEventListener("click", () => {
+    state.selectedParticipantId = null;
+    state.recapMode = "consensus";
+    renderRecap(sessionId);
+  });
+  document.querySelectorAll(".participant-pill").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedParticipantId = button.dataset.participantId;
+      state.recapMode = "consensus";
+      state.revealChecks = {};
+      renderRecap(sessionId);
+    });
   });
 
   if (isRevealMode) {
@@ -312,6 +339,22 @@ function renderStaticDiagram(result = {}, options = {}) {
               ? `${consensus.topChoice.percentage}% · ${formatVoteCount(consensus.topChoice.count, result.submissionCount)}`
               : "No votes";
           return `<div class="drop-slot static ${mode === "solution" ? "reveal-slot" : ""}" data-slot-id="${slot.id}" style="left:${slot.x}%;top:${slot.y}%"><span>${escapeHtml(slot.label)}</span>${service ? renderPlacedService(service, meta, revealCheck ? slot.id : "", getRevealStatusClass(revealCheck)) : `<small>${escapeHtml(slot.hint)}</small>`}</div>`;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function renderParticipantDiagram(participant) {
+  const serviceById = getServiceMap();
+
+  return `
+    <div class="diagram">
+      ${renderDiagramBackdrop()}
+      ${state.config.slots
+        .map((slot) => {
+          const service = serviceById.get(participant.placements?.[slot.id]);
+          return `<div class="drop-slot static" style="left:${slot.x}%;top:${slot.y}%"><span>${escapeHtml(slot.label)}</span>${service ? renderPlacedService(service, "Submitted choice") : `<small>${escapeHtml(slot.hint)}</small>`}</div>`;
         })
         .join("")}
     </div>

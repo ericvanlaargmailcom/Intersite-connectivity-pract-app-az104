@@ -150,7 +150,9 @@ app.get("/api/sessions/:sessionId/recap", requireTrainer, async (req, res, next)
       session: publicSession(session),
       submissionCount: submissions.length,
       participants: submissions.map((submission) => ({
+        participantId: submission.participantId,
         participantName: submission.participantName,
+        placements: submission.placements || {},
         updatedAt: submission.updatedAt || submission.createdAt
       })),
       consensus: buildConsensus(submissions),
