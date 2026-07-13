@@ -183,8 +183,8 @@ export const gameDefinition = {
     },
     {
       id: "paas-private-ip",
-      label: "Private PaaS address",
-      hint: "Dedicated private IP appears inside the VNet",
+      label: "Network Interface",
+      hint: "Dedicated IP appears inside VNet",
       correctServiceId: "private-endpoint",
       x: 85,
       y: 84
