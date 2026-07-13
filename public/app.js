@@ -302,14 +302,12 @@ function renderStaticDiagram(result = {}, options = {}) {
         .map((slot) => {
           const consensus = consensusBySlot.get(slot.id);
           const revealCheck = mode === "solution" ? state.revealChecks[slot.id] : null;
-          const serviceId = revealCheck?.serviceId || consensus?.topChoice?.serviceId;
+          const serviceId = mode === "solution" ? revealCheck?.serviceId : consensus?.topChoice?.serviceId;
           const service = serviceById.get(serviceId);
           const meta = mode === "solution"
             ? revealCheck
               ? (revealCheck.isCorrect ? "Correct" : "Try another place")
-              : consensus?.topChoice
-                ? `${consensus.topChoice.percentage}% · ${formatVoteCount(consensus.topChoice.count, result.submissionCount)}`
-                : "No votes"
+              : ""
             : consensus?.topChoice
               ? `${consensus.topChoice.percentage}% · ${formatVoteCount(consensus.topChoice.count, result.submissionCount)}`
               : "No votes";
