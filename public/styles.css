@@ -286,6 +286,14 @@ input {
   gap: 8px;
 }
 
+.form-error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
 .recap-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;

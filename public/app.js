@@ -101,7 +101,12 @@ async function renderTrainer() {
           <span>Session title</span>
           <input id="sessionTitle" value="AZ-104 networking group" />
         </label>
+        <label>
+          <span>Customer/session code</span>
+          <input id="sessionCode" autocomplete="off" placeholder="e.g. Contoso" />
+        </label>
         <button class="button primary" id="createSession">New session</button>
+        <p class="form-error" id="createSessionError" aria-live="polite"></p>
       </section>
 
       <section class="session-list">
@@ -120,12 +125,18 @@ async function renderTrainer() {
 
   document.querySelector("#createSession").addEventListener("click", async () => {
     const title = document.querySelector("#sessionTitle").value;
-    const result = await trainerApi("/api/sessions", {
-      method: "POST",
-      body: JSON.stringify({ title })
-    });
-    history.pushState(null, "", `/recap/${result.session.sessionId}`);
-    await renderRoute();
+    const sessionCode = normalizeSessionCode(document.querySelector("#sessionCode").value);
+    document.querySelector("#createSessionError").textContent = "";
+    try {
+      const result = await trainerApi("/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ title, sessionCode })
+      });
+      history.pushState(null, "", `/recap/${result.session.sessionId}`);
+      await renderRoute();
+    } catch (error) {
+      document.querySelector("#createSessionError").textContent = error.message;
+    }
   });
 
   document.querySelectorAll("[data-reset-session]").forEach((button) => {

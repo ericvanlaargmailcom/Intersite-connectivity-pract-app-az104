@@ -94,6 +94,12 @@ class CosmosStorage {
       )
     );
   }
+
+  async deleteSession(sessionId) {
+    const container = await this.getContainer();
+    await this.clearSubmissions(sessionId);
+    await container.item(`session:${sessionId}`, sessionId).delete();
+  }
 }
 
 class LocalStorage {
@@ -157,6 +163,15 @@ class LocalStorage {
 
   async clearSubmissions(sessionId) {
     const db = await this.readDb();
+    db.submissions = db.submissions.filter(
+      (submission) => submission.sessionId !== sessionId
+    );
+    await this.writeDb(db);
+  }
+
+  async deleteSession(sessionId) {
+    const db = await this.readDb();
+    db.sessions = db.sessions.filter((session) => session.sessionId !== sessionId);
     db.submissions = db.submissions.filter(
       (submission) => submission.sessionId !== sessionId
     );

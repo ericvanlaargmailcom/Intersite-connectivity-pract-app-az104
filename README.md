@@ -115,3 +115,5 @@ That keeps App Service cold starts fast while the Cosmos-ready package remains a
 - `/play/:sessionId` - learner placement game
 - `/recap/:sessionId` - trainer recap and solution reveal
 - `/api/health` - basic health check
+
+When creating a session, trainers can optionally enter a customer/session code such as `Contoso`. The app normalizes that value to a short uppercase code, so learners can join with the customer name instead of a generated code.

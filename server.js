@@ -66,7 +66,12 @@ app.get("/api/sessions", requireTrainer, async (req, res, next) => {
 app.post("/api/sessions", requireTrainer, async (req, res, next) => {
   try {
     const now = new Date().toISOString();
-    const sessionId = createSessionCode();
+    const requestedSessionId = sanitizeSessionId(req.body?.sessionCode);
+    const sessionId = requestedSessionId || await createUniqueSessionCode();
+    if (requestedSessionId && await storage.getSession(sessionId)) {
+      res.status(409).json({ error: `Session code ${sessionId} already exists.` });
+      return;
+    }
     const session = {
       id: `session:${sessionId}`,
       sessionId,
@@ -107,6 +112,16 @@ app.post("/api/sessions/:sessionId/reset", requireTrainer, async (req, res, next
     };
     await storage.upsertSession(updated);
     res.json({ session: publicSession(updated), submissionCount: 0 });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/sessions/:sessionId", requireTrainer, async (req, res, next) => {
+  try {
+    const session = await requireSession(req.params.sessionId);
+    await storage.deleteSession(session.sessionId);
+    res.json({ deleted: true, sessionId: session.sessionId });
   } catch (error) {
     next(error);
   }
@@ -250,6 +265,19 @@ async function requireSession(rawSessionId) {
     throw error;
   }
   return session;
+}
+
+async function createUniqueSessionCode() {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const sessionId = createSessionCode();
+    if (!await storage.getSession(sessionId)) {
+      return sessionId;
+    }
+  }
+
+  const error = new Error("Could not create a unique session code.");
+  error.status = 500;
+  throw error;
 }
 
 function createSessionCode() {
