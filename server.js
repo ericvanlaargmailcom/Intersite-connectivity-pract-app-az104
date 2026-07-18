@@ -13,8 +13,14 @@ const app = express();
 const port = process.env.PORT || 3000;
 const storage = createStorage();
 const trainerKey = process.env.TRAINER_KEY || "";
+const trainerEmails = parseTrainerEmails(process.env.TRAINER_EMAILS || "");
 
 app.use(express.json({ limit: "100kb" }));
+
+app.get(["/trainer", "/recap/:sessionId"], requireTrainer, (req, res) => {
+  res.sendFile("index.html", { root: "public" });
+});
+
 app.use(express.static("public", { extensions: ["html"] }));
 
 app.get("/api/health", (req, res) => {
@@ -163,7 +169,7 @@ app.get("/api/sessions/:sessionId/recap", requireTrainer, async (req, res, next)
   }
 });
 
-app.get(["/join", "/j", "/trainer", "/play/:sessionId", "/recap/:sessionId"], (req, res) => {
+app.get(["/join", "/j", "/play/:sessionId"], (req, res) => {
   res.sendFile("index.html", { root: "public" });
 });
 
@@ -184,7 +190,7 @@ app.listen(port, () => {
 });
 
 function requireTrainer(req, res, next) {
-  if (!trainerKey) {
+  if (isAuthenticatedTrainer(req)) {
     next();
     return;
   }
@@ -194,12 +200,45 @@ function requireTrainer(req, res, next) {
     req.query.trainerKey ||
     req.body?.trainerKey;
 
-  if (suppliedKey === trainerKey) {
+  if (trainerKey && suppliedKey === trainerKey) {
     next();
     return;
   }
 
+  if (isHtmlRequest(req)) {
+    const redirectTarget = encodeURIComponent(req.originalUrl || "/trainer");
+    res.redirect(`/.auth/login/aad?post_login_redirect_uri=${redirectTarget}`);
+    return;
+  }
+
   res.status(401).json({ error: "Trainer key required." });
+}
+
+function isAuthenticatedTrainer(req) {
+  const principalName = sanitizeText(req.header("x-ms-client-principal-name"), 256).toLowerCase();
+  const principalId = sanitizeText(req.header("x-ms-client-principal-id"), 128);
+
+  if (!principalName && !principalId) {
+    return false;
+  }
+
+  if (!trainerEmails.length) {
+    return true;
+  }
+
+  return trainerEmails.includes(principalName);
+}
+
+function isHtmlRequest(req) {
+  const accept = req.header("accept") || "";
+  return req.method === "GET" && accept.includes("text/html");
+}
+
+function parseTrainerEmails(rawValue) {
+  return rawValue
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
 }
 
 async function requireSession(rawSessionId) {

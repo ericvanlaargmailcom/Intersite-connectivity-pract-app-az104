@@ -11,6 +11,9 @@ param cosmosLocation string = location
 @secure()
 param trainerKey string
 
+@description('Comma-separated trainer email addresses accepted through Azure App Service Authentication.')
+param trainerEmails string = ''
+
 @description('Deploy Cosmos DB. Set to false to publish the web app with local JSON fallback storage.')
 param deployCosmos bool = true
 
@@ -34,6 +37,10 @@ var baseAppSettings = [
   {
     name: 'TRAINER_KEY'
     value: trainerKey
+  }
+  {
+    name: 'TRAINER_EMAILS'
+    value: trainerEmails
   }
   {
     name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'

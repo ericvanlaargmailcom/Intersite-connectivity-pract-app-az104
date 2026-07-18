@@ -55,13 +55,14 @@ Copy `.env.example` to `.env` for local settings.
 ```bash
 PORT=3000
 TRAINER_KEY=change-me
+TRAINER_EMAILS=trainer@example.com
 COSMOS_ENDPOINT=
 COSMOS_KEY=
 COSMOS_DATABASE_ID=az104-placement-game
 COSMOS_CONTAINER_ID=sessions
 ```
 
-If `TRAINER_KEY` is set, trainer API calls require that key. The trainer page stores it in browser local storage.
+For production, protect trainer pages with Azure App Service Authentication and set `TRAINER_EMAILS` to the Microsoft/Entra ID accounts that may use `/trainer` and `/recap/...`. `TRAINER_KEY` remains available as a local development or emergency fallback.
 
 ## Azure deployment
 
@@ -78,6 +79,7 @@ export RESOURCE_GROUP=az104-connectivity-game-rg
 export LOCATION=westeurope
 export APP_NAME=your-globally-unique-app-name
 export TRAINER_KEY='choose-a-strong-trainer-key'
+export TRAINER_EMAILS='trainer@example.com'
 
 bash scripts/deploy-azure.sh
 ```

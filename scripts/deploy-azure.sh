@@ -8,6 +8,7 @@ DEPLOY_COSMOS="${DEPLOY_COSMOS:-true}"
 DEPLOY_REMOTE_BUILD="${DEPLOY_REMOTE_BUILD:-true}"
 APP_NAME="${APP_NAME:-}"
 TRAINER_KEY="${TRAINER_KEY:-}"
+TRAINER_EMAILS="${TRAINER_EMAILS:-}"
 
 cleanup() {
   rm -f app.zip
@@ -27,6 +28,7 @@ DEPLOY_ARGS=(
   --resource-group "$RESOURCE_GROUP"
   --template-file infra/main.bicep
   --parameters trainerKey="$TRAINER_KEY"
+  --parameters trainerEmails="$TRAINER_EMAILS"
   --parameters cosmosLocation="$COSMOS_LOCATION"
   --parameters deployCosmos="$DEPLOY_COSMOS"
 )

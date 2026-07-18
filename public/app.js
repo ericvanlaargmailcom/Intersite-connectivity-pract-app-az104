@@ -87,10 +87,13 @@ async function renderTrainer() {
           <p class="eyebrow">Trainer console</p>
           <h1>Session control</h1>
         </div>
-        <label class="key-field">
-          <span>Trainer key</span>
-          <input id="trainerKey" type="password" value="${escapeHtml(state.trainerKey)}" placeholder="Optional" />
-        </label>
+        <div class="trainer-auth-actions">
+          <a class="button" href="/.auth/logout?post_logout_redirect_uri=/">Sign out</a>
+          <details class="key-field">
+            <summary>Trainer key fallback</summary>
+            <input id="trainerKey" type="password" value="${escapeHtml(state.trainerKey)}" placeholder="Optional local fallback" />
+          </details>
+        </div>
       </header>
 
       <section class="control-panel">
@@ -110,7 +113,7 @@ async function renderTrainer() {
     </section>
   `;
 
-  document.querySelector("#trainerKey").addEventListener("input", (event) => {
+  document.querySelector("#trainerKey")?.addEventListener("input", (event) => {
     state.trainerKey = event.target.value;
     localStorage.setItem("az104TrainerKey", state.trainerKey);
   });

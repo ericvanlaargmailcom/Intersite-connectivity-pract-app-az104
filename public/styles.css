@@ -159,11 +159,23 @@ h2 {
   gap: 6px;
 }
 
+.trainer-auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: end;
+}
+
 .key-field span,
+.key-field summary,
 .control-panel span {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.key-field summary {
+  cursor: pointer;
 }
 
 input {
