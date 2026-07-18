@@ -146,6 +146,17 @@ async function renderTrainer() {
       await renderTrainer();
     });
   });
+
+  document.querySelectorAll("[data-delete-session]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const sessionId = button.dataset.deleteSession;
+      const confirmed = window.confirm(`Delete session ${sessionId} and all submissions? This cannot be undone.`);
+      if (!confirmed) return;
+
+      await trainerApi(`/api/sessions/${sessionId}`, { method: "DELETE" });
+      await renderTrainer();
+    });
+  });
 }
 
 function renderSessionCard(session) {
@@ -161,6 +172,7 @@ function renderSessionCard(session) {
         <a class="button" href="/j">Student join</a>
         <a class="button primary" href="/recap/${session.sessionId}">Recap</a>
         <button class="button danger" data-reset-session="${session.sessionId}">Reset</button>
+        <button class="button danger outline-danger" data-delete-session="${session.sessionId}">Delete</button>
       </div>
     </article>
   `;
